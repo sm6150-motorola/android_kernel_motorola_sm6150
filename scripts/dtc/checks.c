@@ -194,9 +194,9 @@ static void check_is_null_terminated(struct check *c, struct dt_info *dti,
 		     propname, node->fullpath);
 }
 #define WARNING_IF_NOT_NULL_TERMINATED(nm, propname) \
-	WARNING(nm, NULL, check_is_null_terminated, NULL, (propname))
+	WARNING(nm, check_is_null_terminated, (propname))
 #define ERROR_IF_NOT_NULL_TERMINATED(nm, propname) \
-	ERROR(nm, NULL, check_is_null_terminated, NULL, (propname))
+	ERROR(nm, check_is_null_terminated, (propname))
 
 static void check_is_cell(struct check *c, struct dt_info *dti,
 			  struct node *node)
