@@ -72,6 +72,7 @@ obj-$(CONFIG_OKL4_RINGBUF)	+= okl4-ringbuf.o
 obj-$(CONFIG_TEST_IRQ_REQUESTER) += irq_requester.o
 
 obj-y				+= mods/
+obj-$(CONFIG_MOTOMODS) += motomods/
 
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_core.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_bugs.o
