@@ -392,7 +392,7 @@ READELF		= llvm-readelf
 STRIP		= llvm-strip
 HOSTLDFLAGS	+= -fuse-ld=lld
 else
-REAL_CC		= $(CROSS_COMPILE)gcc
+CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)ld
 LDGOLD		= $(CROSS_COMPILE)ld.gold
 AR		= $(CROSS_COMPILE)ar
