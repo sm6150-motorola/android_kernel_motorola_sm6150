@@ -235,10 +235,7 @@ struct smb5 {
 	struct smb_dt_props	dt;
 };
 
-static int __debug_mask;
-module_param_named(
-	debug_mask, __debug_mask, int, 0600
-);
+static int __debug_mask = 0;
 
 static int __pd_disabled;
 module_param_named(
