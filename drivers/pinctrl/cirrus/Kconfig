@@ -1,0 +1,5 @@
+# This is all selected by the Madera MFD driver Kconfig options
+config PINCTRL_MADERA
+	tristate
+	select PINMUX
+	select GENERIC_PINCONF
