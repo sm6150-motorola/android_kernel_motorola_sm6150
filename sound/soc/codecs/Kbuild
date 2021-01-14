@@ -25,15 +25,7 @@ ifeq ($(CONFIG_BORNR_DTB), y)
 EXTRA_CFLAGS += -DCONFIG_TAS2562_REGMAP -DCONFIG_TAS2562_CODEC -DCONFIG_SND_SOC_TAS2562 -DTAS2558_CODEC -DCONFIG_TAS25XX_ALGO -DCONFIG_TAS25XX_CALIB
 endif
 
-ifeq ($(KDIR),)
-PLMA_HOSTSW_DIR=$(realpath -f $(srctree)/$(src))
-else
-PLMA_HOSTSW_DIR=$(realpath -f $(src))
-endif
-GIT_VERSION=$(shell cd $(PLMA_HOSTSW_DIR); git describe --tags --dirty --match "v[0-9]*.[0-9]*.[0-9]*")
-EXTRA_CFLAGS += -DTFA98XX_GIT_VERSIONS=\"$(GIT_VERSION)\"
 # debugging support (also enables trace_printk)
-EXTRA_CFLAGS += -DTFA9874_NONDSP_STEREO
 EXTRA_CFLAGS += -Isound/soc/codecs/inc
 EXTRA_CFLAGS += -Werror
 cirrus_madera-objs = madera.o madera-slimbus.o
@@ -67,16 +59,6 @@ endif
 
 cirrus_playback-objs = msm-cirrus-playback.o
 obj-y += cirrus_playback.o
-
-snd_soc_tfa9874-objs += tfa98xx.o
-snd_soc_tfa9874-objs += tfa_container.o
-snd_soc_tfa9874-objs += tfa_dsp.o
-snd_soc_tfa9874-objs += tfa_init.o
-ifdef TFA_DEBUG
-EXTRA_CFLAGS += -DTFA_DEBUG -DDEBUG
-snd_soc_tfa9874-objs += tfa_debug.o
-endif
-obj-y += snd_soc_tfa9874.o
 
 tas2560-objs = tas2560-core.o tas2560-misc.o tas2560-codec.o tas2560-regmap.o
 obj-y += tas2560.o
