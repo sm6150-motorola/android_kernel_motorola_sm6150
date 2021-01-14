@@ -36,7 +36,7 @@
 #include <linux/async.h>
 #include <linux/firmware.h>
 #include <linux/version.h>
-#include "base.h"
+#include <linux/base.h>
 
 #define SLEEP(x)	mdelay(x)
 
