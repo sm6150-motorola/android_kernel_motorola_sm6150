@@ -1,1 +1,5 @@
+ifeq ($(CONFIG_LIBER_DTB), y)
+EXTRA_CFLAGS += -DCONFIG_USE_HW_CLK
+endif
+
 obj-$(CONFIG_POPUP_AW8646) 	+= aw8646.o
