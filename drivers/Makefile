@@ -197,3 +197,4 @@ obj-$(CONFIG_TZLOG_DUMP)	+= tzlog_dump/
 obj-$(CONFIG_WATCHDOG_CPU_CTX)	+= watchdog_cpu_ctx/
 obj-$(CONFIG_WATCHDOGTEST)	+= watchdogtest/
 obj-$(CONFIG_POPUP_AW8646) 	+= popup/aw8646/
+obj-$(CONFIG_POPUP_AKM09970) 	+= popup/akm09970/
