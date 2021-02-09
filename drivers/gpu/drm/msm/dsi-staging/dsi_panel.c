@@ -834,25 +834,6 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 			panel->fod_dim_lut[i - 1].alpha, panel->fod_dim_lut[i].alpha);
 }
 
-int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
-{
-	int rc = 0;
-
-	if (status) {
-		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_HBM_ON);
-		if (rc)
-			pr_err("[%s] failed to send DSI_CMD_SET_HBM_ON cmd, rc=%d\n",
-					panel->name, rc);
-	} else {
-		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_HBM_OFF);
-		if (rc)
-			pr_err("[%s] failed to send DSI_CMD_SET_HBM_OFF cmd, rc=%d\n",
-					panel->name, rc);
-	}
-
-	return rc;
-}
-
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 {
 	int rc = 0;
@@ -1142,6 +1123,17 @@ void dsi_panel_reset_param(struct dsi_panel *panel)
 		param = &dsi_panel_param[i];
 		param->value = param->default_value;
 	}
+}
+
+int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
+{
+	struct msm_param_info param_info;
+
+	param_info.value = status ? HBM_FOD_ON_STATE : HBM_OFF_STATE;
+	param_info.param_idx = PARAM_HBM_ID;
+	param_info.param_conn_idx = CONNECTOR_PROP_HBM;
+
+	return dsi_panel_set_hbm(panel, &param_info);
 }
 
 static int dsi_panel_bl_register(struct dsi_panel *panel)
