@@ -319,6 +319,8 @@ struct dsi_panel {
 	u32 fod_dim_lut_count;
 
 	bool hbm_state;
+	bool acl_state;
+	bool cabc_state;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
