@@ -634,7 +634,8 @@ void sde_connector_update_fod_hbm(struct drm_connector *connector)
 	if (atomic_xchg(&effective_status, status) == status)
 		return;
 
-	dsi_panel_set_fod_hbm(display->panel, status);
+	if (!display->panel->hbm_state)
+		dsi_panel_set_fod_hbm(display->panel, status);
 
 	dsi_display_set_fod_ui(display, status);
 }
