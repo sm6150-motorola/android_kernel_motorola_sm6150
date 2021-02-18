@@ -54,7 +54,7 @@ static u8 checksum_l_bin;
 #define S_PROX   1
 #define S_BODY   2
 
-#define ABOV_DEBUG 1
+#define ABOV_DEBUG 0
 #define LOG_TAG "ABOV"
 
 #if ABOV_DEBUG
