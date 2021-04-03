@@ -323,6 +323,8 @@ struct dsi_panel {
 
 	struct brightness_alpha_pair *fod_dim_lut;
 	u32 fod_dim_lut_count;
+
+	bool hbm_state;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -456,6 +458,8 @@ int dsi_panel_set_elvss_dim_off(struct dsi_panel *panel, u8 val);
 int dsi_panel_parse_elvss_config(struct dsi_panel *panel, u8 elv_vl);
 
 void dsi_panel_reset_param(struct dsi_panel *panel);
+
+void dsi_panel_set_custom_param(struct dsi_panel *panel);
 
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
 
