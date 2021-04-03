@@ -102,3 +102,4 @@ obj-$(CONFIG_INPUT_ABOV_A96T) += abov_a96t/
 obj-$(CONFIG_INPUT_ABOV_MMI_OVERLAY) += abov_mmi_overlay/
 obj-$(CONFIG_MOTO_UTAGS) += utag/
 obj-$(CONFIG_PEN_BU520XX) += pen/
+obj-$(CONFIG_REGULATOR_TPS61280) += tps61280/

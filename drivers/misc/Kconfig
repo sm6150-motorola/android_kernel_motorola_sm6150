@@ -617,6 +617,7 @@ source "drivers/misc/abov_a96t/Kconfig"
 source "drivers/misc/abov_mmi_overlay/Kconfig"
 source "drivers/misc/utag/Kconfig"
 source "drivers/misc/pen/Kconfig"
+source "drivers/misc/tps61280/Kconfig"
 endmenu
 
 config OKL4_USER_VIPC
