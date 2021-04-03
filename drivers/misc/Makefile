@@ -101,3 +101,4 @@ obj-$(CONFIG_MMI_SYS_TEMP) += mmi_sys_temp/
 obj-$(CONFIG_INPUT_ABOV_A96T) += abov_a96t/
 obj-$(CONFIG_INPUT_ABOV_MMI_OVERLAY) += abov_mmi_overlay/
 obj-$(CONFIG_MOTO_UTAGS) += utag/
+obj-$(CONFIG_PEN_BU520XX) += pen/
