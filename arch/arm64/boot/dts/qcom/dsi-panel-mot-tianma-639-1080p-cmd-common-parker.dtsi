@@ -106,7 +106,7 @@ qcom,mdss-dsi-display-timings {
 
 		qcom,mdss-dsi-hbm-type = "hbm_oled_fod_dcs";
 		qcom,mdss-dsi-hbm-fod-on-command = [
-				39 01 00 00 00 00 02 53 E4];
+				39 01 00 00 34 00 02 53 E4];
 
 		qcom,mdss-dsi-hbm-on-command = [
 				39 01 00 00 00 00 02 53 64];
