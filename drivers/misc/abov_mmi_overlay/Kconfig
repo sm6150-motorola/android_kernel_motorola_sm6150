@@ -1,0 +1,13 @@
+config INPUT_ABOV_MMI_OVERLAY
+        tristate "INPUT_ABOV_MMI_OVERLAY_sensor"
+        depends on I2C
+        default n
+        help
+          Say Y to enable the SAR detection application, if N here not to use the
+          this SAR sensor
+
+config CAPSENSE_HEADSET_STATE
+	bool "Enable cap-sensor headset state"
+	depends on INPUT_ABOV_MMI_OVERLAY
+	help
+	  Enable Cap-sensor headset state.
