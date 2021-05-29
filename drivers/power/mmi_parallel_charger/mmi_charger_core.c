@@ -55,7 +55,7 @@ static int pd_curr_max_init = 0;
 static int *dt_temp_zones;
 static struct mmi_chrg_dts_info *chrg_name_list;
 static char *charge_rate[] = {
-	"None", "Normal", "Weak", "Turbo", "Hyper"
+	"None", "Normal", "Weak", "Turbo", "Turbo_30W", "Hyper"
 };
 #define MIN_TEMP_C -20
 #define MAX_TEMP_C 60
@@ -810,7 +810,7 @@ static int get_prop_charger_present(struct mmi_charger_manager *chg,
 
 #define WEAK_CHRG_THRSH 450
 #define TURBO_CHRG_THRSH 2500
-#define TURBO_CHRG_THRSH_UW 12500000
+#define TURBO_30W_CHRG_THRSH_UW 25000000
 #define HYPER_CHRG_THRSH_UW 40000000
 
 void mmi_chrg_rate_check(struct mmi_charger_manager *chg)
@@ -869,8 +869,8 @@ void mmi_chrg_rate_check(struct mmi_charger_manager *chg)
 		charger_power = (chg->pd_curr_max / 1000) * (chg->pd_volt_max / 1000);
 		if (charger_power >= HYPER_CHRG_THRSH_UW)
 			chg->charger_rate = POWER_SUPPLY_CHARGE_RATE_HYPER;
-		else if (charger_power >= TURBO_CHRG_THRSH_UW)
-			chg->charger_rate = POWER_SUPPLY_CHARGE_RATE_TURBO;
+		else if (charger_power >= TURBO_30W_CHRG_THRSH_UW)
+			chg->charger_rate = POWER_SUPPLY_CHARGE_RATE_TURBO_30W;
 	}
 end_rate_check:
 	if (prev_chg_rate != chg->charger_rate)
@@ -1369,6 +1369,13 @@ static void mmi_heartbeat_work(struct work_struct *work)
 		mmi_cycle_counts(chip);
 
 	mmi_chrg_rate_check(chip);
+       if (!chip->extrn_fg) {
+		val.intval = chip->charger_rate;
+		ret = power_supply_set_property(chip->batt_psy,
+				POWER_SUPPLY_PROP_CHARGE_RATE, &val);
+		if (ret)
+			mmi_chrg_err(chip, "Unable to set charge rate: %d\n", ret);
+       }
 
 	chrg_rate_string = kmalloc(CHG_SHOW_MAX_SIZE, GFP_KERNEL);
 	if (!chrg_rate_string) {
