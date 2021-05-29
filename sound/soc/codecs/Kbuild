@@ -1,24 +1,21 @@
 # add -Wall to try to catch everything we can.
 EXTRA_CFLAGS += -Wall
-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
-
-HAVE_AUDIO_KERNEL = $(shell test -d $(TOP)/vendor/qcom/opensource/audio-kernel && echo 1)
 
 EXTRA_CFLAGS += -Itechpack/audio/include
 EXTRA_CFLAGS += -Itechpack/audio/include/uapi
 
 EXTRA_CFLAGS += -DCONFIG_SND_SOC_AOV_TRIGGER
 
-ifeq ($(CONFIG_CHANNEL_DTB), y)
-EXTRA_CFLAGS += -DCONFIG_TAS2560_REGMAP -DCONFIG_TAS2560_CODEC -DCONFIG_TAS2560_MISC -DCONFIG_SND_SOC_TAS2560
-endif
-
 ifeq ($(CONFIG_LIBER_DTB), y)
 EXTRA_CFLAGS += -DCONFIG_AW882XX_CODEC -DCONFIG_AW882XX_DSP
+snd_smartpa_aw882xx-objs = aw882xx.o
+obj-m += snd_smartpa_aw882xx.o
 endif
 
 ifeq ($(CONFIG_ODESSA_DTB), y)
 EXTRA_CFLAGS += -DCONFIG_AW882XX_CODEC -DCONFIG_AW882XX_DSP
+snd_smartpa_aw882xx-objs = aw882xx.o
+obj-m += snd_smartpa_aw882xx.o
 endif
 
 ifeq ($(CONFIG_BORNR_DTB), y)
@@ -28,6 +25,8 @@ endif
 # debugging support (also enables trace_printk)
 EXTRA_CFLAGS += -Isound/soc/codecs/inc
 EXTRA_CFLAGS += -Werror
+
+ifeq ($(CONFIG_PARKER_DTB), y)
 cirrus_madera-objs = madera.o madera-slimbus.o
 obj-m += cirrus_madera.o
 
@@ -59,18 +58,9 @@ endif
 
 cirrus_playback-objs = msm-cirrus-playback.o
 obj-m += cirrus_playback.o
+endif
 
-tas2560-objs = tas2560-core.o tas2560-misc.o tas2560-codec.o tas2560-regmap.o
-obj-m += tas2560.o
-
-tas2560_algo-objs = tas2560-algo.o
-obj-m += tas2560_algo.o
-
-tas2560_calib-objs = tas2560-calib.o
-obj-m += tas2560_calib.o
-
+ifeq ($(CONFIG_UNKNOWN_DTB), y)
 tas2562-objs = tas2562-codec.o tas2562-regmap.o tas25xx-algo.o tas25xx-calib.o
 obj-m += tas2562.o
-
-snd_smartpa_aw882xx-objs = aw882xx.o
-obj-m += snd_smartpa_aw882xx.o
+endif
