@@ -26,6 +26,7 @@
 #else
 #include <linux/leds.h>
 #endif
+#include <linux/mmi_wake_lock.h>
 
 /*********************************************************
  *
@@ -240,6 +241,7 @@ enum aw8695_haptic_mode{
 	HAPTIC_SHORT	= 0x01,
 	HAPTIC_LONG	= 0x02,
 	HAPTIC_RTP	= 0x03,
+	HAPTIC_RTP_LOOP	= 0x04,
 };
 /*********************************************************
  *
