@@ -27,6 +27,7 @@
 #include <linux/debugfs.h>
 #include <linux/miscdevice.h>
 #include <asm/uaccess.h>
+#include <linux/pm_qos.h>
 #include <linux/syscalls.h>
 #include <linux/power_supply.h>
 #include "aw8695.h"
@@ -57,6 +58,14 @@
 
 #define AW8695_MAX_FIRMWARE_LOAD_CNT 20
 #define AW8695_SEQ_NO_RTP_BASE 102
+#define AW8695_SEQ_NO_RTP_REPEAT 100
+#define AW8695_SEQ_NO_RTP_STOP 120000
+
+#define AW8695_REPEAT_RTP_PLAYING
+
+#define PM_QOS_VALUE_VB 400
+struct pm_qos_request pm_qos_req_vb;
+
 /******************************************************
  *
  * variable
@@ -109,6 +118,13 @@ static char aw8695_rtp_name[][AW8695_RTP_NAME_MAX] = {
 	{"aw8695_rtp_Solarium.bin"},
 	{"aw8695_rtp_Sparse.bin"},
 	{"aw8695_rtp_Terrabytes.bin"},
+	{"aw8695_rtp_Zero_Hour.bin"},
+	{"aw8695_rtp_Play.bin"},
+	{"aw8695_rtp_TJINGLE.bin"},
+	{"aw8695_rtp_Verizon_Airwaves.bin"},
+	{"aw8695_rtp_City_Lights.bin"},
+	{"aw8695_rtp_Firefly.bin"},
+	{"aw8695_rtp_Now_or_Never.bin"},
 };
 
 struct aw8695_container *aw8695_rtp;
@@ -1138,15 +1154,28 @@ static unsigned char aw8695_haptic_rtp_get_fifo_afi(struct aw8695 *aw8695)
 static int aw8695_haptic_rtp_init(struct aw8695 *aw8695)
 {
 	unsigned int buf_len = 0;
+	unsigned char reg_val = 0;
 
 	pr_info("%s enter\n", __func__);
+	pm_qos_add_request(&pm_qos_req_vb, PM_QOS_CPU_DMA_LATENCY, PM_QOS_VALUE_VB);
 
 	aw8695->rtp_cnt = 0;
 
 	while ((!aw8695_haptic_rtp_get_fifo_afi(aw8695)) &&
 	       (aw8695->play_mode == AW8695_HAPTIC_RTP_MODE)) {
 		pr_info("%s rtp cnt = %d\n", __func__, aw8695->rtp_cnt);
-		if ((aw8695_rtp->len - aw8695->rtp_cnt) < (aw8695->ram.base_addr >> 2)) {
+		if (!aw8695_rtp) {
+			pr_info("%s:aw8695_rtp is null break\n", __func__);
+			break;
+		}
+
+		if ((aw8695->rtp_cnt < aw8695->ram.base_addr)) {
+			if((aw8695_rtp->len-aw8695->rtp_cnt) < (aw8695->ram.base_addr)){
+				buf_len = aw8695_rtp->len-aw8695->rtp_cnt;
+			} else {
+				buf_len = (aw8695->ram.base_addr);
+			}
+		} else if ((aw8695_rtp->len - aw8695->rtp_cnt) < (aw8695->ram.base_addr >> 2)) {
 			buf_len = aw8695_rtp->len - aw8695->rtp_cnt;
 		} else {
 			buf_len = (aw8695->ram.base_addr >> 2);
@@ -1154,9 +1183,12 @@ static int aw8695_haptic_rtp_init(struct aw8695 *aw8695)
 		aw8695_i2c_writes(aw8695, AW8695_REG_RTP_DATA,
 				  &aw8695_rtp->data[aw8695->rtp_cnt], buf_len);
 		aw8695->rtp_cnt += buf_len;
-		if (aw8695->rtp_cnt == aw8695_rtp->len) {
+
+		aw8695_i2c_read(aw8695, AW8695_REG_GLB_STATE, &reg_val);
+		if ((aw8695->rtp_cnt == aw8695_rtp->len) || ((reg_val & 0x0f) == 0x00)) {
 			pr_info("%s: rtp update complete\n", __func__);
 			aw8695->rtp_cnt = 0;
+			pm_qos_remove_request(&pm_qos_req_vb);
 			return 0;
 		}
 	}
@@ -1164,7 +1196,7 @@ static int aw8695_haptic_rtp_init(struct aw8695 *aw8695)
 	if (aw8695->play_mode == AW8695_HAPTIC_RTP_MODE) {
 		aw8695_haptic_set_rtp_aei(aw8695, true);
 	}
-
+	pm_qos_remove_request(&pm_qos_req_vb);
 	pr_info("%s exit\n", __func__);
 
 	return 0;
@@ -1201,6 +1233,8 @@ static void aw8695_rtp_work_routine(struct work_struct *work)
 	memcpy(aw8695_rtp->data, rtp_file->data, rtp_file->size);
 	release_firmware(rtp_file);
 
+	mutex_lock(&aw8695->lock);
+
 	aw8695->rtp_init = 1;
 
 	/* gain */
@@ -1211,6 +1245,8 @@ static void aw8695_rtp_work_routine(struct work_struct *work)
 
 	/* haptic start */
 	aw8695_haptic_start(aw8695);
+
+	mutex_unlock(&aw8695->lock);
 
 	aw8695_haptic_rtp_init(aw8695);
 }
@@ -1857,9 +1893,15 @@ static void aw8695_vibrate(struct aw8695 *aw8695, int value)
 	int seq = 0;
 	mutex_lock(&aw8695->lock);
 
+#ifdef AW8695_REPEAT_RTP_PLAYING
+	if (aw8695->haptic_mode == HAPTIC_RTP_LOOP) {
+		aw8695->haptic_mode = HAPTIC_RTP;
+		hrtimer_cancel(&aw8695->timer);
+	}
+#endif
 	aw8695_haptic_stop(aw8695);
 	if (aw8695->index == 0x02)
-		__pm_relax(aw8695->ws);
+		PM_RELAX(aw8695->ws);
 
 	seq = aw8695->seq[0];
 	pr_info("%s: value=%d, seq=%d, index=%x\n", __FUNCTION__, value, seq, aw8695->index);
@@ -1869,6 +1911,20 @@ static void aw8695_vibrate(struct aw8695 *aw8695, int value)
 		if (seq >= AW8695_SEQ_NO_RTP_BASE) {
 			aw8695->haptic_mode = HAPTIC_RTP;
 			aw8695->gain = 0x80;
+#ifdef AW8695_REPEAT_RTP_PLAYING
+			if (seq >= AW8695_SEQ_NO_RTP_BASE + AW8695_SEQ_NO_RTP_REPEAT) {
+				aw8695->haptic_mode = HAPTIC_RTP_LOOP;
+				seq -= AW8695_SEQ_NO_RTP_REPEAT;
+
+				value = AW8695_SEQ_NO_RTP_STOP;
+				PM_WAKEUP_EVENT(aw8695->ws, value + 100);
+				/* run ms timer */
+				hrtimer_cancel(&aw8695->timer);
+				hrtimer_start(&aw8695->timer,
+					ktime_set(value / 1000, (value % 1000) * 1000000),
+					HRTIMER_MODE_REL);
+			}
+#endif
 		} else if (value < 100 || seq > 2) {
 			aw8695->haptic_mode = HAPTIC_SHORT;
 			aw8695->gain = 0x80;
@@ -1886,6 +1942,7 @@ static void aw8695_vibrate(struct aw8695 *aw8695, int value)
 		switch (aw8695->haptic_mode) {
 
 		case HAPTIC_RTP:
+		case HAPTIC_RTP_LOOP:
 			aw8695_rtp_play(aw8695, seq - AW8695_SEQ_NO_RTP_BASE);
 			break;
 		case HAPTIC_SHORT:
@@ -1902,7 +1959,7 @@ static void aw8695_vibrate(struct aw8695 *aw8695, int value)
 			/* wav index config */
 			aw8695->index = 0x02;
 			aw8695_haptic_set_repeat_wav_seq(aw8695, aw8695->index);
-			__pm_wakeup_event(aw8695->ws, value + 100);
+			PM_WAKEUP_EVENT(aw8695->ws, value + 100);
 			/* run ms timer */
 			hrtimer_cancel(&aw8695->timer);
 			aw8695->state = 0x01;
@@ -3192,6 +3249,10 @@ static void aw8695_vibrator_work_routine(struct work_struct *work)
 
 	mutex_lock(&aw8695->lock);
 
+#ifdef AW8695_REPEAT_RTP_PLAYING
+	if (aw8695->haptic_mode == HAPTIC_RTP_LOOP)
+		aw8695->haptic_mode = HAPTIC_RTP;
+#endif
 	aw8695_haptic_stop(aw8695);
 	if (aw8695->state) {
 		if (aw8695->activate_mode == AW8695_HAPTIC_ACTIVATE_RAM_MODE) {
@@ -3250,7 +3311,7 @@ static int aw8695_vibrator_init(struct aw8695 *aw8695)
 
 	INIT_WORK(&aw8695->rtp_work, aw8695_rtp_work_routine);
 
-	aw8695->ws = wakeup_source_register("vibrator");
+	PM_WAKEUP_REGISTER(aw8695->dev, aw8695->ws, "vibrator");
 	if (!aw8695->ws)
 		return -ENOMEM;
 
@@ -3307,6 +3368,7 @@ static irqreturn_t aw8695_irq(int irq, void *data)
 	unsigned char reg_val = 0;
 	unsigned char dbg_val = 0;
 	unsigned int buf_len = 0;
+	unsigned char glb_state = 0;
 
 	pr_debug("%s enter\n", __func__);
 
@@ -3346,11 +3408,16 @@ static irqreturn_t aw8695_irq(int irq, void *data)
 				aw8695_i2c_writes(aw8695, AW8695_REG_RTP_DATA,
 						  &aw8695_rtp->data[aw8695->rtp_cnt], buf_len);
 				aw8695->rtp_cnt += buf_len;
-				if (aw8695->rtp_cnt == aw8695_rtp->len) {
+				aw8695_i2c_read(aw8695, AW8695_REG_GLB_STATE, &glb_state);
+				if ((aw8695->rtp_cnt == aw8695_rtp->len) || ((glb_state & 0x0f) == 0x00)) {
 					pr_info("%s: rtp update complete\n", __func__);
 					aw8695_haptic_set_rtp_aei(aw8695, false);
 					aw8695->rtp_cnt = 0;
 					aw8695->rtp_init = 0;
+#ifdef AW8695_REPEAT_RTP_PLAYING
+					if (aw8695->haptic_mode == HAPTIC_RTP_LOOP)
+						aw8695_rtp_play(aw8695, aw8695->rtp_file_num);
+#endif
 					break;
 				}
 			}
@@ -3735,7 +3802,7 @@ static int aw8695_i2c_remove(struct i2c_client *i2c)
 	if (gpio_is_valid(aw8695->reset_gpio))
 		devm_gpio_free(&i2c->dev, aw8695->reset_gpio);
 
-	wakeup_source_unregister(aw8695->ws);
+	PM_WAKEUP_UNREGISTER(aw8695->ws);
 
 	devm_kfree(&i2c->dev, aw8695);
 	aw8695 = NULL;
