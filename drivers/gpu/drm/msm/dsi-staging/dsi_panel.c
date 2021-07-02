@@ -1211,7 +1211,7 @@ int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status)
 {
 	struct msm_param_info param_info;
 
-	param_info.value = status ? HBM_FOD_ON_STATE : HBM_OFF_STATE;
+	param_info.value = status ? HBM_ON_STATE : HBM_OFF_STATE;
 	param_info.param_idx = PARAM_HBM_ID;
 	param_info.param_conn_idx = CONNECTOR_PROP_HBM;
 
