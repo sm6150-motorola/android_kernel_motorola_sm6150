@@ -62,7 +62,7 @@ ifeq ($(KERNEL_BUILD), 0)
         ifeq ($(CONFIG_LIBER_DTB), y)
 		INCS    +=  -include $(AUDIO_ROOT)/config/liberautoconf.h
 	endif
-        ifeq ($(CONFIG_HANOI_DTB), y)
+        ifeq ($(CONFIG_HANOIP_DTB), y)
 		INCS    +=  -include $(AUDIO_ROOT)/config/hanoiautoconf.h
 	endif
         ifeq ($(CONFIG_ODESSA_DTB), y)
