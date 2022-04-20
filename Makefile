@@ -723,6 +723,9 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, restrict)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, stringop-truncation)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, zero-length-bounds)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-but-set-variable)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-function)
+KBUILD_CFLAGS	+= $(call cc-disable-warning, unused-variable)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
