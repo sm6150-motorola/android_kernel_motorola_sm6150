@@ -872,9 +872,13 @@ u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel)
 	if (i == panel->fod_dim_lut_count)
 		return panel->fod_dim_lut[i - 1].alpha;
 
-	return interpolate(brightness,
-			panel->fod_dim_lut[i - 1].brightness, panel->fod_dim_lut[i].brightness,
-			panel->fod_dim_lut[i - 1].alpha, panel->fod_dim_lut[i].alpha);
+	if (!panel->force_fod_dim_alpha) {
+		panel->fod_dim_alpha = interpolate(brightness,
+						panel->fod_dim_lut[i - 1].brightness, panel->fod_dim_lut[i].brightness,
+						panel->fod_dim_lut[i - 1].alpha, panel->fod_dim_lut[i].alpha);
+		return panel->fod_dim_alpha;
+	} else
+		return panel->fod_dim_alpha;
 }
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
@@ -905,6 +909,9 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 		pr_err("Backlight type(%d) not supported\n", bl->type);
 		rc = -ENOTSUPP;
 	}
+
+	if (!panel->force_fod_dim_alpha)
+		panel->fod_dim_alpha = dsi_panel_get_fod_dim_alpha(panel);
 
 	return rc;
 }
@@ -1113,6 +1120,12 @@ static int dsi_panel_set_cabc(struct dsi_panel *panel,
 
         return rc;
 };
+
+bool dsi_panel_get_force_fod_ui(struct dsi_panel *panel)
+{
+	struct dsi_display *dsi_display = container_of(panel->host, struct dsi_display, host);
+	return atomic_read(&dsi_display->fod_ui);
+}
 
 static int dsi_panel_set_acl(struct dsi_panel *panel,
                         struct msm_param_info *param_info)
