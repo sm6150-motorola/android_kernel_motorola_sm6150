@@ -5308,6 +5308,7 @@ static struct sde_hw_dim_layer* sde_crtc_setup_fod_dim_layer(
 	struct drm_display_mode *mode = &crtc_state->adjusted_mode;
 	struct sde_hw_dim_layer *dim_layer = NULL;
 	struct dsi_display *display;
+	struct dsi_panel *panel;
 	struct sde_kms *kms;
 	uint32_t layer_stage;
 	uint32_t alpha;
@@ -5335,6 +5336,8 @@ static struct sde_hw_dim_layer* sde_crtc_setup_fod_dim_layer(
 		SDE_ERROR("Invalid primary display\n");
 		goto error;
 	}
+
+	panel = display->panel;
 
 	mutex_lock(&display->panel->panel_lock);
 	alpha = dsi_panel_get_fod_dim_alpha(display->panel);

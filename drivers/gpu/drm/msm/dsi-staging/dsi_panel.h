@@ -327,6 +327,8 @@ struct dsi_panel {
 	bool hbm_state;
 	bool acl_state;
 	bool cabc_state;
+	bool force_fod_dim_alpha;
+	u8 fod_dim_alpha;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -466,5 +468,7 @@ void dsi_panel_set_custom_param(struct dsi_panel *panel);
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
 
 u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel);
+
+bool dsi_panel_get_force_fod_ui(struct dsi_panel *panel);
 
 #endif /* _DSI_PANEL_H_ */
