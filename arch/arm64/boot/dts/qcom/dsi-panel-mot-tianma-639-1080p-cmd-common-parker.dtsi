@@ -42,33 +42,47 @@ qcom,mdss-dsi-te-check-enable;
 qcom,mdss-dsi-te-using-te-pin;
 
 qcom,bklt-dcs-2bytes-enabled;
-qcom,mdss-dsi-bl-min-level = <1>;
-qcom,mdss-dsi-bl-max-level = <2047>;
+qcom,mdss-dsi-bl-min-level = <10>;
+qcom,mdss-dsi-bl-max-level = <1023>;
 qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 
 qcom,disp-fod-dim-lut = <
-					/* brightness, alpha */
-					0	0xFF
-					4	0xEB
-					8	0xEA
-					12	0xE9
-					13	0xE8
-					20	0xE5
-					24	0xE3
-					30	0xE0
-					68	0xD0
-					133	0xC0
-					218	0xB0
-					328	0xA0
-					486	0x90
-					642	0x80
-					832	0x70
-					1043	0x60
-					1267	0x50
-					1500	0x40
-					1770	0x30
-					2000	0x24
-					2047	0x21
+	    /* brightness, alpha */
+					1 233
+					16 220
+					33 206
+					49 196
+					66 187
+					82 181
+					99 175
+					132 162
+					165 153
+					198 145
+					231 138
+					264 131
+					297 127
+					330 123
+					363 118
+					396 113
+					429 108
+					462 102
+					495 97
+					528 94
+					561 90
+					594 85
+					627 80
+					660 75
+					693 72
+					726 66
+					759 65
+					792 61
+					825 56
+					858 52
+					891 49
+					924 44
+					957 42
+					990 38
+					1023 35
 				>;
 
 qcom,mdss-dsi-display-timings {
